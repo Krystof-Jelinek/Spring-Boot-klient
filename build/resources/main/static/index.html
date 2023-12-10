@@ -2,6 +2,7 @@
 <html lang="en">
 
     <link href="styles.css" rel ="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
 
     <head>
         <meta charset="UTF-8">
@@ -12,23 +13,65 @@
     <body>
 
         <h1 id="main_header">Car Rental</h1>
+        <div class="tab-container">
+            <button class="tab-button" id="tab-button-employee" onclick="openTab('employee')">Employee</button>
+            <button class="tab-button" id="tab-button-vehicle" onclick="openTab('vehicle')">Vehicle</button>
+            <button class="tab-button" id="tab-button-order" onclick="openTab('order')">Order</button>
+          </div>
         <br>
-        <h2> Employees </h2>
+        <h2 id= "table_header"> TMP </h2>
         <br>
 
-        <table id="employeeTable">
-            <thead>
+        <div id="employee" class="tab-content">
+            <table id="employeeTable">
+              <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Birth Date</th>
+                  <th>ID</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Birth Date</th>
+                  <th>Action</th>
                 </tr>
-            </thead>
-            <tbody>
+              </thead>
+              <tbody>
                 <!-- Data will be dynamically added here using JavaScript -->
-            </tbody>
-        </table>
+              </tbody>
+            </table>
+          </div>
+          
+          <div id="vehicle" class="tab-content">
+            <table id="vehicleTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>SPZ</th>
+                  <th>Color</th>
+                  <th>Equipment Level</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Data will be dynamically added here using JavaScript -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div id="order" class="tab-content">
+            <table id="orderTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Cost</th>
+                  <th>Date</th>
+                  <th>Vehicle ID</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Data will be dynamically added here using JavaScript -->
+              </tbody>
+            </table>
+          </div>
 
         <script src = "script.js"></script>
 
