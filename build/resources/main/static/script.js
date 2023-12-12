@@ -1,3 +1,24 @@
+function showWarningMessage(message) {
+  const msg = document.getElementById("warning_msg");
+  console.log("WRONG");
+        msg.style.display = "block";
+        msg.style.opacity = 1;
+        msg.style.transition = "none";
+        msg.innerHTML = message
+        msg.style.color = "red";
+        msg.style.textAlign = "center";
+
+
+        setTimeout(function() {
+            msg.style.opacity = 0;
+            msg.style.transition = "opacity 1s ease-in-out";
+        }, 600);
+
+        setTimeout(function() {
+          msg.style.display = "none";
+      }, 1600);
+}
+
 async function printAllEmployees() {
     try {
         const response = await fetch('http://localhost:9000/employee', {
@@ -22,18 +43,22 @@ function updateEmployeeTable(employees) {
 
         const idCell = document.createElement("td");
         idCell.textContent = employee.id;
+        idCell.setAttribute("data-column", "id");
         row.appendChild(idCell);
 
         const firstNameCell = document.createElement("td");
         firstNameCell.textContent = employee.firstName;
+        firstNameCell.setAttribute("data-column", "firstName");
         row.appendChild(firstNameCell);
 
         const lastNameCell = document.createElement("td");
         lastNameCell.textContent = employee.lastName;
+        lastNameCell.setAttribute("data-column", "lastName");
         row.appendChild(lastNameCell);
 
         const birthDateCell = document.createElement("td");
         birthDateCell.textContent = employee.birthDate;
+        birthDateCell.setAttribute("data-column", "birthDate");
         row.appendChild(birthDateCell);
 
         const actionCell = document.createElement("td");
@@ -46,6 +71,65 @@ function updateEmployeeTable(employees) {
 
         tableBody.appendChild(row);
     });
+}
+
+async function printAllOrders() {
+  try {
+      const response = await fetch('http://localhost:9000/order', {
+          method: 'GET'
+      });
+
+      const data = await response.json();
+
+      updateOrderTable(data);
+  } catch (error) {
+      console.error('Error fetching data:', error);
+  }
+}
+
+function updateOrderTable(orders) {
+  const tableBody = document.querySelector("#orderTable tbody");
+
+  tableBody.innerHTML = "";
+
+  orders.forEach(order => {
+      const row = document.createElement("tr");
+
+      const idCell = document.createElement("td");
+      idCell.textContent = order.id;
+      idCell.setAttribute("data-column", "id");
+      row.appendChild(idCell);
+
+      const costCell = document.createElement("td");
+      costCell.textContent = order.cost;
+      costCell.setAttribute("data-column", "cost");
+      row.appendChild(costCell);
+
+      const dateCell = document.createElement("td");
+      dateCell.textContent = order.date;
+      dateCell.setAttribute("data-column", "dateOfPayment");
+      row.appendChild(dateCell);
+
+      const vehicleIdCell = document.createElement("td");
+      if(order.vehicle != null){
+        vehicleIdCell.textContent = order.vehicle.id;
+      }
+      else{
+        vehicleIdCell.textContent = "-";
+      }
+      vehicleIdCell.setAttribute("data-column", "vehicle");
+      row.appendChild(vehicleIdCell);
+
+      const actionCell = document.createElement("td");
+      const deleteButton = createActionButton("order",order.id, "delete");
+      const updateButton = createActionButton("order",order.id, "update");
+
+      actionCell.appendChild(deleteButton);
+      actionCell.appendChild(updateButton);
+      row.appendChild(actionCell);
+
+      tableBody.appendChild(row);
+  });
 }
 
 async function printAllVehicles() {
@@ -98,55 +182,6 @@ function updateVehicleTable(vehicles) {
   });
 }
 
-async function printAllOrders() {
-  try {
-      const response = await fetch('http://localhost:9000/order', {
-          method: 'GET'
-      });
-
-      const data = await response.json();
-
-      updateOrderTable(data);
-  } catch (error) {
-      console.error('Error fetching data:', error);
-  }
-}
-
-function updateOrderTable(orders) {
-  const tableBody = document.querySelector("#orderTable tbody");
-
-  tableBody.innerHTML = "";
-
-  orders.forEach(order => {
-      const row = document.createElement("tr");
-
-      const idCell = document.createElement("td");
-      idCell.textContent = order.id;
-      row.appendChild(idCell);
-
-      const costCell = document.createElement("td");
-      costCell.textContent = order.cost;
-      row.appendChild(costCell);
-
-      const dateCell = document.createElement("td");
-      dateCell.textContent = order.date; // Update with the actual property name for the date
-      row.appendChild(dateCell);
-
-      const vehicleIdCell = document.createElement("td");
-      vehicleIdCell.textContent = order.vehicleId; // Update with the actual property name for the vehicle ID
-      row.appendChild(vehicleIdCell);
-
-      const actionCell = document.createElement("td");
-      const deleteButton = createActionButton("order",order.id, "delete");
-      const updateButton = createActionButton("order",order.id, "update");
-
-      actionCell.appendChild(deleteButton);
-      actionCell.appendChild(updateButton);
-      row.appendChild(actionCell);
-
-      tableBody.appendChild(row);
-  });
-}
 
 function createActionButton(entityType ,id , actionType) {
   const button = document.createElement("button");
@@ -166,9 +201,10 @@ function createActionButton(entityType ,id , actionType) {
   button.style.border = 'none';
   button.style.padding = '8px';
   button.style.cursor = 'pointer';
+  button.style.width = '29px';
 
   if (actionType === "update") {
-    button.style.marginLeft = '16px';
+    button.style.marginLeft = '10px';
   }
 
   // Add hover effect
@@ -183,22 +219,21 @@ function createActionButton(entityType ,id , actionType) {
       button.style.boxShadow = 'none';
   });
 
-  button.addEventListener("click", () => handleAction(entityType , id, actionType));
+  button.addEventListener("click", () => handleAction(entityType , id, actionType, button));
 
   button.appendChild(icon);
 
   return button;
 }
 
-// Function to handle the delete or update action
-function handleAction(type ,id , actionType) {
+function handleAction(type ,id , actionType, button) {
   switch(type){
     case 'employee':
       if (actionType === "delete") {
           deleteEntity(type,id);
       } else if (actionType === "update") {
-          // Implement your update logic here
-          console.log(`Update ${type} with ID ${employeeId}`);
+          editEntity(type, button);
+          console.log(`Update ${type} with ID ${id}`);
       }
     break;
     
@@ -206,8 +241,8 @@ function handleAction(type ,id , actionType) {
       if (actionType === "delete") {
           deleteEntity(type,id);
       } else if (actionType === "update") {
-          // Implement your update logic here
-          console.log(`Update ${type} with ID ${employeeId}`);
+          editEntity(type, button);
+          console.log(`Update ${type} with ID ${id}`);
       }
     break;
 
@@ -215,8 +250,8 @@ function handleAction(type ,id , actionType) {
       if (actionType === "delete") {
           deleteEntity(type,id);
       } else if (actionType === "update") {
-          // Implement your update logic here
-          console.log(`Update ${type} with ID ${employeeId}`);
+          editEntity(type, button);
+          console.log(`Update ${type} with ID ${id}`);
       }
     break;
 
@@ -274,6 +309,142 @@ async function deleteEntity(type, id) {
     break;
   }
 }
+
+async function editEntity(type, button){
+  var row = button.parentNode.parentNode;
+  var cells = row.getElementsByTagName("td");
+
+  for (var i = 1; i < cells.length - 1; i++) {
+    var cell = cells[i];
+    var currentText = cell.textContent || cell.innerText;
+
+    // Replace the cell content with an input field
+    cell.innerHTML = '<input type="text" class="editable" value="' + currentText + '">';
+
+    var actionCell = cells[cells.length - 1];
+
+    actionCell.innerHTML = `
+    <button onclick="saveRow(this)" data-type="${type}" class="custom-btn save-btn">
+        <i class="fas fa-check"></i>
+    </button>
+    <button onclick="discardChanges(this)" class="custom-btn discard-btn">
+        <i class="fas fa-times"></i>
+    </button>
+`;
+  }
+}
+
+async function saveRow(button) {
+  var row = button.parentNode.parentNode;
+  const cells_tmp = row.querySelectorAll("td:not(:first-child)"); 
+  const cells = Array.from(cells_tmp);
+  cells.pop();
+  var id = row.querySelector("td:first-child");
+  const rowData = { };
+    cells.forEach(cell => {
+        const input = cell.querySelector('input');
+        const columnName = cell.getAttribute("data-column");
+        rowData[columnName] = input.value;
+    });
+
+  if(button.getAttribute("data-type") == "employee"){
+    saveEmployeeRow(rowData, id);
+    return;
+  }
+
+  if(button.getAttribute("data-type") == "order"){
+    saveOrderRow(rowData, id);
+    return;
+  }
+
+  if(button.getAttribute("data-type") == "vehicle"){
+    saveEmployeeRow(rowData, id);
+    return;
+  }
+  
+}
+
+async function saveEmployeeRow(rowData, id) {
+  try {
+    const response = await fetch('http://localhost:9000/employee/' + id.innerHTML, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(rowData),
+    });
+
+    const resp = await response;
+    
+    if (!response.ok) {
+      showWarningMessage("The date is not valid");
+      throw new Error('Network response was not ok');
+    }
+
+    console.log('Data updated successfully:', resp);
+    openTab("employee");
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+  }
+}
+
+async function saveOrderRow(rowData, id) {
+  console.log(rowData);
+  
+  const keys = Object.keys(rowData);
+  const lastKey = keys[keys.length - 1];
+  var vehicle_id = rowData[lastKey];
+  delete rowData[lastKey];
+  console.log(rowData);
+
+  try {
+    const response = await fetch('http://localhost:9000/order/' + id.innerHTML, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(rowData),
+    });
+
+    const resp = await response;
+    
+    if (!response.ok) {
+      showWarningMessage("The date is not valid");
+      throw new Error('Network response was not ok');
+    }
+
+    console.log('Data updated successfully:', resp);
+    openTab("order");
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+  }
+
+  try{
+    const response = await fetch('http://localhost:9000/vehicle/order/'+ vehicle_id + '/' + id.innerHTML, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const resp = await response;
+    
+    if (!response.ok) {
+      showWarningMessage("The id of vehicle is not valid");
+      throw new Error('Network response was not ok');
+    }
+
+    console.log('Data updated successfully:', resp);
+    openTab("order");
+    } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+    }
+}
+
+function discardChanges(button) {
+  openTab(button.parentNode.parentNode.parentNode.parentNode.parentNode.id);
+}
+
 
 function openTab(tabName) {
     // Hide all tab contents
