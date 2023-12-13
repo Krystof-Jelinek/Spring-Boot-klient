@@ -348,17 +348,17 @@ async function saveRow(button) {
     });
 
   if(button.getAttribute("data-type") == "employee"){
-    saveEmployeeRow(rowData, id);
+    await saveEmployeeRow(rowData, id);
     return;
   }
 
   if(button.getAttribute("data-type") == "order"){
-    saveOrderRow(rowData, id);
+    await saveOrderRow(rowData, id);
     return;
   }
 
   if(button.getAttribute("data-type") == "vehicle"){
-    saveEmployeeRow(rowData, id);
+    await saveEmployeeRow(rowData, id);
     return;
   }
   
@@ -395,7 +395,6 @@ async function saveOrderRow(rowData, id) {
   const lastKey = keys[keys.length - 1];
   var vehicle_id = rowData[lastKey];
   delete rowData[lastKey];
-  console.log(rowData);
 
   try {
     const response = await fetch('http://localhost:9000/order/' + id.innerHTML, {
@@ -408,37 +407,61 @@ async function saveOrderRow(rowData, id) {
 
     const resp = await response;
     
-    if (!response.ok) {
+    if (!resp.ok) {
       showWarningMessage("The date is not valid");
       throw new Error('Network response was not ok');
     }
 
-    console.log('Data updated successfully:', resp);
-    openTab("order");
-  } catch (error) {
-    console.error('There was a problem with the fetch operation:', error);
-  }
+      try{
+        if(vehicle_id.length == 0){
+          const response = await fetch('http://localhost:9000/vehicle/order/' + id.innerHTML, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+              },
+          });
 
-  try{
-    const response = await fetch('http://localhost:9000/vehicle/order/'+ vehicle_id + '/' + id.innerHTML, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+        console.log("fucking here")
+        const resp = await response;
+        
+          if (!resp.ok) {
+            showWarningMessage("You did something really wrong");
+            throw new Error('Network response was not ok');
+          }
+        
+        }
+        else{
+          const response = await fetch('http://localhost:9000/vehicle/order/'+ vehicle_id + '/' + id.innerHTML, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+      
+          const resp = await response;
+          
+          if (!response.ok) {
+            showWarningMessage("The id of vehicle is not valid");
+            throw new Error('Network response was not ok');
+          }
+        }
 
-    const resp = await response;
     
-    if (!response.ok) {
-      showWarningMessage("The id of vehicle is not valid");
-      throw new Error('Network response was not ok');
-    }
+        console.log('Data updated successfully:', resp);
+        openTab("order");
+    
+        } catch (error) {
+          console.error('There was a problem with the fetch operation:', error);
+          return;
+        }
 
     console.log('Data updated successfully:', resp);
     openTab("order");
-    } catch (error) {
+
+  } catch(error){
     console.error('There was a problem with the fetch operation:', error);
-    }
+    return;
+  }
 }
 
 function discardChanges(button) {
