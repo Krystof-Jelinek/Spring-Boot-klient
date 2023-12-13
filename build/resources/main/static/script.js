@@ -19,6 +19,71 @@ function showWarningMessage(message) {
       }, 1600);
 }
 
+function showCorrectMessage(message) {
+  const msg = document.getElementById("warning_msg");
+  console.log("CORRECT");
+        msg.style.display = "block";
+        msg.style.opacity = 1;
+        msg.style.transition = "none";
+        msg.innerHTML = message
+        msg.style.color = "green";
+        msg.style.textAlign = "center";
+
+
+        setTimeout(function() {
+            msg.style.opacity = 0;
+            msg.style.transition = "opacity 1s ease-in-out";
+        }, 600);
+
+        setTimeout(function() {
+          msg.style.display = "none";
+      }, 1600);
+}
+
+function toggleForm(type){
+
+  var formContainer;
+  var button;
+
+  if(type == "employee"){
+    formContainer = document.getElementById("employeeFormContainer");
+    button = document.getElementById("addEmployeeButton");
+  }
+  if(type == "order"){
+    formContainer = document.getElementById("orderFormContainer");
+    button = document.getElementById("addOrderButton");
+  }
+  if(type == "vehicle"){
+    formContainer = document.getElementById("vehicleFormContainer");
+    button = document.getElementById("addVehicleButton");
+  }
+
+  if (formContainer.style.display === "none" || formContainer.style.display === "") {
+    formContainer.offsetHeight;
+      formContainer.style.display = "block";
+      button.style.backgroundColor = "#1c7921";
+      formContainer.style.height = formContainer.scrollHeight + "px";
+  } else {
+      formContainer.style.height = "0";
+      button.style.backgroundColor = "#2ecc71";
+      setTimeout(function () {
+          formContainer.style.display = "none";
+      }, 500);
+  }
+}
+
+function toggleEmployeeForm() {
+  toggleForm("employee");
+}
+
+function toggleOrderForm(){
+  toggleForm("order");
+}
+
+function toggleVehicleForm(){
+  toggleForm("vehicle");
+}
+
 async function printAllEmployees() {
     try {
         const response = await fetch('http://localhost:9000/employee', {
@@ -156,18 +221,22 @@ function updateVehicleTable(vehicles) {
 
       const idCell = document.createElement("td");
       idCell.textContent = vehicle.id;
+      idCell.setAttribute("data-column", "id");
       row.appendChild(idCell);
 
       const spzCell = document.createElement("td");
       spzCell.textContent = vehicle.spz;
+      spzCell.setAttribute("data-column", "spz");
       row.appendChild(spzCell);
 
       const colorCell = document.createElement("td");
       colorCell.textContent = vehicle.color;
+      colorCell.setAttribute("data-column", "color");
       row.appendChild(colorCell);
 
       const equipmentLevelCell = document.createElement("td");
       equipmentLevelCell.textContent = vehicle.equipmentLevel;
+      equipmentLevelCell.setAttribute("data-column", "equipmentLevel");
       row.appendChild(equipmentLevelCell);
 
       const actionCell = document.createElement("td");
@@ -181,7 +250,6 @@ function updateVehicleTable(vehicles) {
       tableBody.appendChild(row);
   });
 }
-
 
 function createActionButton(entityType ,id , actionType) {
   const button = document.createElement("button");
@@ -329,8 +397,7 @@ async function editEntity(type, button){
     </button>
     <button onclick="discardChanges(this)" class="custom-btn discard-btn">
         <i class="fas fa-times"></i>
-    </button>
-`;
+    </button>`;
   }
 }
 
@@ -358,7 +425,7 @@ async function saveRow(button) {
   }
 
   if(button.getAttribute("data-type") == "vehicle"){
-    await saveEmployeeRow(rowData, id);
+    await saveVehicleRow(rowData, id);
     return;
   }
   
@@ -421,7 +488,6 @@ async function saveOrderRow(rowData, id) {
               },
           });
 
-        console.log("fucking here")
         const resp = await response;
         
           if (!resp.ok) {
@@ -464,10 +530,150 @@ async function saveOrderRow(rowData, id) {
   }
 }
 
+async function saveVehicleRow(rowData, id){
+  try {
+    const response = await fetch('http://localhost:9000/vehicle/' + id.innerHTML, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(rowData),
+    });
+
+    const resp = await response;
+    
+    if (!response.ok) {
+      showWarningMessage("EquipmentLevel can only be an number");
+      throw new Error('Network response was not ok');
+    }
+
+    console.log('Data updated successfully:', resp);
+    openTab("vehicle");
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+  }
+}
+
 function discardChanges(button) {
   openTab(button.parentNode.parentNode.parentNode.parentNode.parentNode.id);
 }
 
+async function addEmployee(){
+  var firstName = document.getElementById("firstName").value;
+  var lastName = document.getElementById("lastName").value;
+  var birthDate = document.getElementById("birthDate").value;
+
+  if (!firstName || !lastName || !birthDate) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  var employeeData = {
+    firstName: firstName,
+    lastName: lastName,
+    birthDate: birthDate
+  };
+
+  fetch('http://localhost:9000/employee', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(employeeData)
+  })
+  .then(response => {
+    console.log(response);
+
+    showCorrectMessage("New Employee added");
+
+    // Clear the input fields
+    document.getElementById("firstName").value = "";
+    document.getElementById("lastName").value = "";
+    document.getElementById("birthDate").value = "";
+
+    openTab("employee");
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+async function addOrder(){
+  var cost = document.getElementById("cost").value;
+  var dateOfPayment = document.getElementById("dateOfPayment").value;
+
+  if (!cost || !dateOfPayment) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  var orderData = {
+    cost: cost,
+    dateOfPayment: dateOfPayment,
+  };
+
+  fetch('http://localhost:9000/order', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(orderData)
+  })
+  .then(response => {
+    console.log(response);
+
+    showCorrectMessage("New Order added");
+
+    // Clear the input fields
+    document.getElementById("cost").value = "";
+    document.getElementById("dateOfPayment").value = "";
+
+    openTab("order");
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+async function addVehicle(){
+  var spz = document.getElementById("spz").value;
+  var color = document.getElementById("color").value;
+  var equipmentLevel = document.getElementById("equipmentLevel").value;
+
+  if (!spz || !color || !equipmentLevel) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  var vehicleData = {
+    spz: spz,
+    color: color,
+    equipmentLevel: equipmentLevel
+  };
+
+  fetch('http://localhost:9000/vehicle', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(vehicleData)
+  })
+  .then(response => {
+    console.log(response);
+
+    showCorrectMessage("New Vehicle added");
+
+    // Clear the input fields
+    document.getElementById("spz").value = "";
+    document.getElementById("color").value = "";
+    document.getElementById("equipmentLevel").value = "";
+
+    openTab("vehicle");
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
 
 function openTab(tabName) {
     // Hide all tab contents

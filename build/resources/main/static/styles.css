@@ -8,6 +8,9 @@ h2 {
     color: #333;
 }
 
+/*VEHICLE / ORDER / EMPLOYEE PICK MENU */
+/*--------------------------------------------------------*/
+
 table {
     border-collapse: collapse;
     width: 80%;
@@ -35,7 +38,7 @@ tr:hover {
 .tab-container {
     overflow: hidden;
     text-align: center;
-  }
+}
   
 .tab-button {
     background-color: #4CAF50;
@@ -55,9 +58,11 @@ tr:hover {
 
 .tab-button.active {
     background-color: #1c7921; /* Change this to the color you want for the active button */
-  }
+}
 
-  .custom-btn {
+/*------------------------BUTTONS---------------------------------*/
+
+.custom-btn {
     color: white;
     border: none;
     padding: 8px;
@@ -78,4 +83,126 @@ tr:hover {
     background-color: #e74c3c;
     margin-left: 5px;
     width: 29px;
+}
+
+/*-----------------------------FORM---------------------------------*/
+
+form {
+    max-width: 400px;
+    margin: 0 auto;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #4CAF50;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/*------------------------------EMPLOYEE RELATED-----------------------------------*/
+
+#employeeFormContainer {
+    overflow: hidden;
+    transition: height 0.5s ease-in-out;
+    margin-bottom: 25px; /* Add a margin to separate the form from the table */
+    padding-bottom: 20px;
+    height: 0;
+    display: none;
+}
+
+#employee{
+    position: relative;
+}
+
+#addEmployeeButton {
+    position: absolute;
+    top: -40px; 
+    left: 10%;
+    /*DONT TOUCH THE ABOVE*/
+    background-color: #2ecc71; 
+    color: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#addEmployeeButton:hover {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/*-----------------------------------ORDER RELATED-----------------------*/
+
+#addOrderButton {
+    position: absolute;
+    top: -40px; 
+    left: 10%;
+    /*DONT TOUCH THE ABOVE*/
+    background-color: #2ecc71; 
+    color: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#addOrderButton:hover {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+#orderFormContainer {
+    overflow: hidden;
+    transition: height 0.5s ease-in-out;
+    margin-bottom: 25px; /* Add a margin to separate the form from the table */
+    padding-bottom: 20px;
+    height: 0;
+    display: none;
+}
+
+#order{
+    position: relative;
+}
+
+/*------------------------VEHICLE RELATED----------------------------*/
+
+#vehicleFormContainer {
+    overflow: hidden;
+    transition: height 0.5s ease-in-out;
+    margin-bottom: 25px; /* Add a margin to separate the form from the table */
+    padding-bottom: 20px;
+    height: 0;
+    display: none;
+}
+
+#vehicle{
+    position: relative;
+}
+
+#addVehicleButton {
+    position: absolute;
+    top: -40px; 
+    left: 10%;
+    /*DONT TOUCH THE ABOVE*/
+    background-color: #2ecc71; 
+    color: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#addVehicleButton:hover {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }

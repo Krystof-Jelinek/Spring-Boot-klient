@@ -17,8 +17,8 @@
         <h1 id="main_header">Car Rental</h1>
         <div class="tab-container">
             <button class="tab-button" id="tab-button-employee" onclick="openTab('employee')">Employee</button>
-            <button class="tab-button" id="tab-button-vehicle" onclick="openTab('vehicle')">Vehicle</button>
             <button class="tab-button" id="tab-button-order" onclick="openTab('order')">Order</button>
+            <button class="tab-button" id="tab-button-vehicle" onclick="openTab('vehicle')">Vehicle</button>
           </div>
         <br>
         <h2 id= "table_header"> TMP </h2>
@@ -26,6 +26,22 @@
         <br>
 
         <div id="employee" class="tab-content">
+          <button id="addEmployeeButton" onclick="toggleEmployeeForm()"><i class="fas fa-plus"></i></button>
+          <div id="employeeFormContainer" style="display: none;">
+            <h2>Add New Employee</h2>
+            <form id="employeeForm">
+              <label for="firstName">First Name:</label>
+              <input type="text" id="firstName" name="firstName" required>
+        
+              <label for="lastName">Last Name:</label>
+              <input type="text" id="lastName" name="lastName" required>
+        
+              <label for="birthDate">Birth Date:</label>
+              <input type="date" id="birthDate" name="birthDate" required>
+        
+              <button type="button" class = "custom-btn" onclick="addEmployee()" style="background-color: #45a049; color: white; border: none;">Add Employee</button>
+            </form>
+          </div>
             <table id="employeeTable">
               <thead>
                 <tr>
@@ -37,29 +53,24 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Data will be dynamically added here using JavaScript -->
-              </tbody>
-            </table>
-          </div>
-          
-          <div id="vehicle" class="tab-content">
-            <table id="vehicleTable">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>SPZ</th>
-                  <th>Color</th>
-                  <th>Equipment Level</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Data will be dynamically added here using JavaScript -->
               </tbody>
             </table>
           </div>
           
           <div id="order" class="tab-content">
+              <button id="addOrderButton" onclick="toggleOrderForm()"><i class="fas fa-plus"></i></button>
+              <div id="orderFormContainer" style="display: none;">
+                <h2>Add New Order</h2>
+                <form id="orderForm">
+                  <label for="cost">Cost:</label>
+                  <input type="number" id="cost" name="cost" required>
+            
+                  <label for="dateOfPayment">Date of payment:</label>
+                  <input type="date" id="dateOfPayment" name="dateOfPayment" required>
+            
+                  <button type="button" class = "custom-btn" onclick="addOrder()" style="background-color: #45a049; color: white; border: none;">Add Order</button>
+                </form>
+              </div>
             <table id="orderTable">
               <thead>
                 <tr>
@@ -71,10 +82,43 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Data will be dynamically added here using JavaScript -->
               </tbody>
             </table>
           </div>
+
+          <div id="vehicle" class="tab-content">
+            <button id="addVehicleButton" onclick="toggleVehicleForm()"><i class="fas fa-plus"></i></button>
+              <div id="vehicleFormContainer" style="display: none;">
+                <h2>Add New Vehicle</h2>
+                <form id="vehicleForm">
+                  <label for="cost">SPZ:</label>
+                  <input type="text" id="spz" name="spz" required>
+
+                  <label for="color">Color:</label>
+                  <input type="text" id="color" name="color" required>
+            
+                  <label for="equipmentLevel">Level of equipment:</label>
+                  <input type="number" id="equipmentLevel" name="equipmentLevel" required>
+            
+                  <button type="button" class = "custom-btn" onclick="addVehicle()" style="background-color: #45a049; color: white; border: none;">Add Vehicle</button>
+                </form>
+              </div>
+            
+            <table id="vehicleTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>SPZ</th>
+                  <th>Color</th>
+                  <th>Equipment Level</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+          
 
         <script src = "script.js"></script>
 
