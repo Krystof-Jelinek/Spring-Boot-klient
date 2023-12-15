@@ -109,6 +109,7 @@ function updateEmployeeTable(employees) {
         const idCell = document.createElement("td");
         idCell.textContent = employee.id;
         idCell.setAttribute("data-column", "id");
+        idCell.setAttribute("employee-id-column", employee.id);
         row.appendChild(idCell);
 
         const firstNameCell = document.createElement("td");
@@ -129,12 +130,20 @@ function updateEmployeeTable(employees) {
         const actionCell = document.createElement("td");
         const deleteButton = createActionButton("employee" ,employee.id, "delete");
         const updateButton = createActionButton("employee",employee.id, "update");
+        const showButton = createActionButton("employee", employee.id, "show");
 
         actionCell.appendChild(deleteButton);
         actionCell.appendChild(updateButton);
+        actionCell.appendChild(showButton);
         row.appendChild(actionCell);
 
         tableBody.appendChild(row);
+
+        // Create an invisible div for orders after the row
+        const ordersDiv = document.createElement("div");
+        ordersDiv.id = "employeeOrderDiv" + employee.id;
+        ordersDiv.style.display = "none"; // Initially hide the div
+        tableBody.appendChild(ordersDiv);
     });
 }
 
@@ -260,9 +269,15 @@ function createActionButton(entityType ,id , actionType) {
   if (actionType === "delete") {
       icon.classList.add("fa-trash");
       button.style.backgroundColor = '#e74c3c';
-  } else if (actionType === "update") {
+  } 
+  else if (actionType === "update") {
       icon.classList.add("fa-pencil-alt");
       button.style.backgroundColor = '#3498db';
+  }
+  else if (actionType === "show") {
+    icon.classList.add("fa-list");
+    button.style.backgroundColor = '#f39c12';
+    button.style.transition = 'background-color 0.3s, box-shadow 0.3s';
   }
 
   button.style.color = 'white';
@@ -275,16 +290,25 @@ function createActionButton(entityType ,id , actionType) {
     button.style.marginLeft = '10px';
   }
 
-  // Add hover effect
   button.addEventListener("mouseover", () => {
-      button.style.backgroundColor = (actionType === "delete") ? '#c0392b' : '#2980b9';
-      button.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
+    if (actionType === "delete") {
+      button.style.backgroundColor = '#c0392b';
+    } else if (actionType === "show") {
+    } else {
+      button.style.backgroundColor = '#3498db';
+    }
+    button.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
   });
-
+  
   // Reset styles on mouseout
   button.addEventListener("mouseout", () => {
-      button.style.backgroundColor = (actionType === "delete") ? '#e74c3c' : '#3498db';
-      button.style.boxShadow = 'none';
+    if (actionType === "delete") {
+      button.style.backgroundColor = '#e74c3c';
+    } else if (actionType === "show") {
+    } else {
+      button.style.backgroundColor = '#3498db';
+    }
+    button.style.boxShadow = 'none';
   });
 
   button.addEventListener("click", () => handleAction(entityType , id, actionType, button));
@@ -303,6 +327,9 @@ function handleAction(type ,id , actionType, button) {
           editEntity(type, button);
           console.log(`Update ${type} with ID ${id}`);
       }
+      else if (actionType === "show"){
+        showEntity(type, id, button);
+      }
     break;
     
     case 'order':
@@ -312,6 +339,9 @@ function handleAction(type ,id , actionType, button) {
           editEntity(type, button);
           console.log(`Update ${type} with ID ${id}`);
       }
+      else if (actionType === "show"){
+        showEntity(type, id, button);
+      }
     break;
 
     case 'vehicle':
@@ -320,6 +350,9 @@ function handleAction(type ,id , actionType, button) {
       } else if (actionType === "update") {
           editEntity(type, button);
           console.log(`Update ${type} with ID ${id}`);
+      }
+      else if (actionType === "show"){
+        showEntity(type, id, button);
       }
     break;
 
@@ -399,6 +432,81 @@ async function editEntity(type, button){
         <i class="fas fa-times"></i>
     </button>`;
   }
+}
+
+async function showEntity(type, id, button) {
+  try {
+    const response = await fetch("http://localhost:9000/employee/" + id ,{
+        method: 'GET'
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      displayOrdersBelowRow(id, data.orders, button);
+      //button.style.backgroundColor = '#f39c12';
+        
+    } else {
+        console.error('Error loading employee:', response.status);
+    }
+} catch (error) {
+    console.error('Error loading employee:', error);
+}
+}
+
+function displayOrdersBelowRow(employeeId, orders, button) {
+  var ordersDiv = document.getElementById("employeeOrderDiv" + employeeId);
+  
+  // Toggle the visibility of ordersDiv
+  if (ordersDiv.style.display === 'none') {
+    ordersDiv.style.display = 'block';
+    button.style.backgroundColor = '#a56920';
+  } else {
+    ordersDiv.style.display = 'none';
+    button.style.backgroundColor = '#f39c12';
+  }
+
+  // Clear existing content in ordersDiv
+  ordersDiv.innerHTML = "";
+
+  // Create a table element
+  const table = document.createElement("table");
+
+  // Create a table header
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  const orderHeaderCells = ['Order ID', 'Cost', 'Date'];
+
+  orderHeaderCells.forEach(headerText => {
+    const headerCell = document.createElement("th");
+    headerCell.textContent = headerText;
+    headerRow.appendChild(headerCell);
+  });
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Create a table body
+  const tbody = document.createElement("tbody");
+
+  // Iterate through orders and create rows in the table body
+  orders.forEach(order => {
+    const orderRow = document.createElement("tr");
+    const orderCells = [order.id, order.cost, order.date];
+
+    orderCells.forEach(cellValue => {
+      const orderCell = document.createElement("td");
+      orderCell.textContent = cellValue;
+      orderRow.appendChild(orderCell);
+    });
+
+    tbody.appendChild(orderRow);
+  });
+
+  table.appendChild(tbody);
+
+  // Append the table to the ordersDiv
+  ordersDiv.appendChild(table);
 }
 
 async function saveRow(button) {
