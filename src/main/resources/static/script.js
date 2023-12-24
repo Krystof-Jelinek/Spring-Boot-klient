@@ -132,9 +132,9 @@ function updateEmployeeTable(employees) {
         const updateButton = createActionButton("employee",employee.id, "update");
         const showButton = createActionButton("employee", employee.id, "show");
 
-        actionCell.appendChild(deleteButton);
         actionCell.appendChild(updateButton);
         actionCell.appendChild(showButton);
+        actionCell.appendChild(deleteButton);
         row.appendChild(actionCell);
 
         tableBody.appendChild(row);
@@ -197,12 +197,20 @@ function updateOrderTable(orders) {
       const actionCell = document.createElement("td");
       const deleteButton = createActionButton("order",order.id, "delete");
       const updateButton = createActionButton("order",order.id, "update");
+      const showButton = createActionButton("order", order.id, "show");
 
-      actionCell.appendChild(deleteButton);
       actionCell.appendChild(updateButton);
+      actionCell.appendChild(showButton);
+      actionCell.appendChild(deleteButton);
       row.appendChild(actionCell);
 
       tableBody.appendChild(row);
+
+      // Create an invisible div for orders after the row
+      const employeeDiv = document.createElement("div");
+      employeeDiv.id = "orderEmployeeDiv" + order.id;
+      employeeDiv.style.display = "none"; // Initially hide the div
+      tableBody.appendChild(employeeDiv);
   });
 }
 
@@ -251,12 +259,20 @@ function updateVehicleTable(vehicles) {
       const actionCell = document.createElement("td");
       const deleteButton = createActionButton("vehicle",vehicle.id, "delete");
       const updateButton = createActionButton("vehicle",vehicle.id, "update");
+      const showButton = createActionButton("vehicle", vehicle.id, "show");
 
-      actionCell.appendChild(deleteButton);
       actionCell.appendChild(updateButton);
+      actionCell.appendChild(showButton);
+      actionCell.appendChild(deleteButton);
       row.appendChild(actionCell);
 
       tableBody.appendChild(row);
+
+      // Create an invisible div for orders after the row
+      const ordersDiv = document.createElement("div");
+      ordersDiv.id = "vehicleOrderDiv" + vehicle.id;
+      ordersDiv.style.display = "none"; // Initially hide the div
+      tableBody.appendChild(ordersDiv);
   });
 }
 
@@ -286,7 +302,10 @@ function createActionButton(entityType ,id , actionType) {
   button.style.cursor = 'pointer';
   button.style.width = '29px';
 
-  if (actionType === "update") {
+  if (actionType === "show") {
+    button.style.marginLeft = '10px';
+  }
+  if (actionType === "delete") {
     button.style.marginLeft = '10px';
   }
 
@@ -435,15 +454,28 @@ async function editEntity(type, button){
 }
 
 async function showEntity(type, id, button) {
+  if(type == "employee"){
+    displayOrdersBelowRow(id,button);
+  }
+  if(type == "order"){
+    displayEmployeesBelowRow(id,button);
+  }
+  if(type == "vehicle"){
+    displayOrdersBelowRowForVehicle(id,button);
+  }
+}
+
+async function updateOrdersBelowDiv(employeeId){
+
+  let data;
+
   try {
-    const response = await fetch("http://localhost:9000/employee/" + id ,{
+    const response = await fetch("http://localhost:9000/employee/" + employeeId ,{
         method: 'GET'
     });
 
     if (response.ok) {
-      const data = await response.json();
-      displayOrdersBelowRow(id, data.orders, button);
-      //button.style.backgroundColor = '#f39c12';
+      data = await response.json();
         
     } else {
         console.error('Error loading employee:', response.status);
@@ -451,19 +483,10 @@ async function showEntity(type, id, button) {
 } catch (error) {
     console.error('Error loading employee:', error);
 }
-}
 
-function displayOrdersBelowRow(employeeId, orders, button) {
+  const orders = data.orders;
+
   var ordersDiv = document.getElementById("employeeOrderDiv" + employeeId);
-  
-  // Toggle the visibility of ordersDiv
-  if (ordersDiv.style.display === 'none') {
-    ordersDiv.style.display = 'block';
-    button.style.backgroundColor = '#a56920';
-  } else {
-    ordersDiv.style.display = 'none';
-    button.style.backgroundColor = '#f39c12';
-  }
 
   // Clear existing content in ordersDiv
   ordersDiv.innerHTML = "";
@@ -507,6 +530,329 @@ function displayOrdersBelowRow(employeeId, orders, button) {
 
   // Append the table to the ordersDiv
   ordersDiv.appendChild(table);
+
+  const inputOrderID = document.createElement("input");
+  inputOrderID.type = "number";
+  inputOrderID.placeholder = "Enter Order ID";
+  inputOrderID.style.marginLeft = "20px";
+  ordersDiv.appendChild(inputOrderID);
+
+
+  // Add a submit button
+  const submitButton = document.createElement("button");
+  submitButton.textContent = "+";  // Change the text content to a plus sign
+  submitButton.className = "custom-btn save-btn";  // Use predefined styles
+  submitButton.style.marginLeft = "20px";
+  submitButton.onclick = async function() {
+    const orderId = inputOrderID.value;
+    try {
+      const response = await fetch("http://localhost:9000/employee/order/" + employeeId + "/" + orderId ,{
+          method: 'POST'
+      });
+      console.log(response);
+      if (response.ok) {
+          showCorrectMessage("Employee/Order Relation Added");
+          updateOrdersBelowDiv(employeeId);
+      } else {
+          console.error('Error loading employee:', response.status);
+          showWarningMessage("There is no order with this ID");
+      }
+  } catch (error) {
+      console.error('Error loading employee:', error);
+  }
+  };
+  ordersDiv.appendChild(submitButton);
+
+  // Add a discard button
+  const discardButton = document.createElement("button");
+  discardButton.classList.add("custom-btn");
+  discardButton.style.marginLeft = "10px";
+  discardButton.style.marginBottom = "15px";
+
+
+  // Add the specific style for the discard button
+  discardButton.classList.add("discard-btn");
+
+  // Create a span element for the minus sign
+  const minusSign = document.createElement("span");
+  minusSign.textContent = "−"; // Minus sign character
+
+  // Append the minus sign to the discard button
+  discardButton.appendChild(minusSign);
+
+  discardButton.onclick = async function() {
+    const orderId = inputOrderID.value;
+    try {
+      const response = await fetch("http://localhost:9000/employee/order/" + employeeId + "/" + orderId ,{
+          method: 'DELETE'
+      });
+      console.log(response);
+      if (response.ok) {
+        showCorrectMessage("Employee/Order Relation Removed");
+        updateOrdersBelowDiv(employeeId);
+      } else {
+          console.error('Error loading employee:', response.status);
+          showWarningMessage("There is no order with this ID");
+      }
+    } catch (error) {
+        console.error('Error loading employee:', error);
+    }
+  };
+  ordersDiv.appendChild(discardButton);
+
+}
+
+async function updateEmployeesBelowDiv(orderId){
+
+  let data;
+
+  try {
+    const response = await fetch("http://localhost:9000/order/" + orderId ,{
+        method: 'GET'
+    });
+
+    if (response.ok) {
+      data = await response.json();
+        
+    } else {
+        console.error('Error loading order:', response.status);
+    }
+} catch (error) {
+    console.error('Error loading order:', error);
+}
+
+  const employees = data.employees;
+
+  var employeesDiv = document.getElementById("orderEmployeeDiv" + orderId);
+
+  // Clear existing content in employeesDiv
+  employeesDiv.innerHTML = "";
+
+  // Create a table element
+  const table = document.createElement("table");
+
+  // Create a table header
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  const orderHeaderCells = ['Employee ID', 'First Name', 'Last Name', 'Birth Date'];
+
+  orderHeaderCells.forEach(headerText => {
+    const headerCell = document.createElement("th");
+    headerCell.textContent = headerText;
+    headerRow.appendChild(headerCell);
+  });
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Create a table body
+  const tbody = document.createElement("tbody");
+
+  // Iterate through orders and create rows in the table body
+  employees.forEach(employee => {
+    const employeeRow = document.createElement("tr");
+    const employeeCells = [employee.id, employee.firstName, employee.lastName, employee.birthDate];
+
+    employeeCells.forEach(cellValue => {
+      const employeeCell = document.createElement("td");
+      employeeCell.textContent = cellValue;
+      employeeRow.appendChild(employeeCell);
+    });
+
+    tbody.appendChild(employeeRow);
+  });
+
+  table.appendChild(tbody);
+
+  // Append the table to the employeesDiv
+  employeesDiv.appendChild(table);
+
+  const inputEmployeeID = document.createElement("input");
+  inputEmployeeID.type = "number";
+  inputEmployeeID.placeholder = "Enter Employee ID";
+  inputEmployeeID.style.marginLeft = "20px";
+  employeesDiv.appendChild(inputEmployeeID);
+
+
+  // Add a submit button
+  const submitButton = document.createElement("button");
+  submitButton.textContent = "+";  // Change the text content to a plus sign
+  submitButton.className = "custom-btn save-btn";  // Use predefined styles
+  submitButton.style.marginLeft = "20px";
+  submitButton.onclick = async function() {
+    const employeeId = inputEmployeeID.value;
+    try {
+      const response = await fetch("http://localhost:9000/employee/order/" + employeeId + "/" + orderId ,{
+          method: 'POST'
+      });
+      console.log(response);
+      if (response.ok) {
+          showCorrectMessage("Employee/Order Relation Added");
+          updateEmployeesBelowDiv(orderId);
+      } else {
+          console.error('Error loading order:', response.status);
+          showWarningMessage("There is no employee with this ID");
+      }
+  } catch (error) {
+      console.error('Error loading order:', error);
+  }
+  };
+  employeesDiv.appendChild(submitButton);
+
+  // Add a discard button
+  const discardButton = document.createElement("button");
+  discardButton.classList.add("custom-btn");
+  discardButton.style.marginLeft = "10px";
+  discardButton.style.marginBottom = "15px";
+
+
+  // Add the specific style for the discard button
+  discardButton.classList.add("discard-btn");
+
+  // Create a span element for the minus sign
+  const minusSign = document.createElement("span");
+  minusSign.textContent = "−"; // Minus sign character
+
+  // Append the minus sign to the discard button
+  discardButton.appendChild(minusSign);
+
+  discardButton.onclick = async function() {
+    const employeeId = inputEmployeeID.value;
+    try {
+      const response = await fetch("http://localhost:9000/employee/order/" + employeeId + "/" + orderId ,{
+          method: 'DELETE'
+      });
+      console.log(response);
+      if (response.ok) {
+        showCorrectMessage("Employee/Order Relation Removed");
+        updateEmployeesBelowDiv(orderId);
+      } else {
+          console.error('Error loading order:', response.status);
+          showWarningMessage("There is no order with this ID");
+      }
+    } catch (error) {
+        console.error('Error loading order:', error);
+    }
+  };
+  employeesDiv.appendChild(discardButton);
+
+}
+
+async function updateOrdersBelowDivForVehicle(vehicleId){
+
+  let data;
+
+  try {
+    const response = await fetch("http://localhost:9000/vehicle/" + vehicleId ,{
+        method: 'GET'
+    });
+
+    if (response.ok) {
+      data = await response.json();
+        
+    } else {
+        console.error('Error loading vehicle:', response.status);
+    }
+} catch (error) {
+    console.error('Error loading vehicle:', error);
+}
+
+  const orders = data.orders;
+
+  var orderDiv = document.getElementById("vehicleOrderDiv" + vehicleId);
+
+  // Clear existing content in orderDiv
+  orderDiv.innerHTML = "";
+
+  // Create a table element
+  const table = document.createElement("table");
+
+  // Create a table header
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  const orderHeaderCells = ['Order ID', 'Cost', 'Date'];
+
+  orderHeaderCells.forEach(headerText => {
+    const headerCell = document.createElement("th");
+    headerCell.textContent = headerText;
+    headerRow.appendChild(headerCell);
+  });
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Create a table body
+  const tbody = document.createElement("tbody");
+
+  // Iterate through orders and create rows in the table body
+  orders.forEach(employee => {
+    const employeeRow = document.createElement("tr");
+    const employeeCells = [employee.id, employee.cost, employee.date];
+
+    employeeCells.forEach(cellValue => {
+      const employeeCell = document.createElement("td");
+      employeeCell.textContent = cellValue;
+      employeeRow.appendChild(employeeCell);
+    });
+
+    tbody.appendChild(employeeRow);
+  });
+
+  table.appendChild(tbody);
+
+  
+  // Append the table to the orderDiv
+  orderDiv.appendChild(table);
+}
+
+function displayOrdersBelowRow(employeeId, button) {
+  var ordersDiv = document.getElementById("employeeOrderDiv" + employeeId);
+  
+  // Toggle the visibility of ordersDiv
+  if (ordersDiv.style.display === 'none') {
+    ordersDiv.style.display = 'block';
+    button.style.backgroundColor = '#a56920';
+    updateOrdersBelowDiv(employeeId);
+  } else {
+    ordersDiv.style.display = 'none';
+    button.style.backgroundColor = '#f39c12';
+    return;
+  }
+  
+}
+
+function displayEmployeesBelowRow(orderId, button) {
+  var employeeDiv = document.getElementById("orderEmployeeDiv" + orderId);
+  
+  // Toggle the visibility of employeeDiv
+  if (employeeDiv.style.display === 'none') {
+    employeeDiv.style.display = 'block';
+    button.style.backgroundColor = '#a56920';
+    updateEmployeesBelowDiv(orderId);
+  } else {
+    employeeDiv.style.display = 'none';
+    button.style.backgroundColor = '#f39c12';
+    return;
+  }
+  
+}
+
+function displayOrdersBelowRowForVehicle(vehicleId, button) {
+  var vehicleDiv = document.getElementById("vehicleOrderDiv" + vehicleId);
+  
+  // Toggle the visibility of vehicleDiv
+  if (vehicleDiv.style.display === 'none') {
+    vehicleDiv.style.display = 'block';
+    button.style.backgroundColor = '#a56920';
+    updateOrdersBelowDivForVehicle(vehicleId);
+  } else {
+    vehicleDiv.style.display = 'none';
+    button.style.backgroundColor = '#f39c12';
+    return;
+  }
+  
 }
 
 async function saveRow(button) {

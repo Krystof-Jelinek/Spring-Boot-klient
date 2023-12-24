@@ -9,5 +9,4 @@ public class TjvKlientApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TjvKlientApplication.class, args);
 	}
-
 }
