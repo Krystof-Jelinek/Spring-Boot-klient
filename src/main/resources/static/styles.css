@@ -8,6 +8,19 @@ h2 {
     color: #333;
 }
 
+.fixed-notification {
+    display: none;
+    position: fixed;
+    top: 20px; /* Adjust the top position as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Ensure it's above other elements */
+  }
+
 /*VEHICLE / ORDER / EMPLOYEE PICK MENU */
 /*--------------------------------------------------------*/
 

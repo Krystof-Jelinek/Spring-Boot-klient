@@ -1,43 +1,31 @@
 function showWarningMessage(message) {
-  const msg = document.getElementById("warning_msg");
   console.log("WRONG");
-        msg.style.display = "block";
-        msg.style.opacity = 1;
-        msg.style.transition = "none";
-        msg.innerHTML = message
-        msg.style.color = "red";
-        msg.style.textAlign = "center";
-
-
-        setTimeout(function() {
-            msg.style.opacity = 0;
-            msg.style.transition = "opacity 1s ease-in-out";
-        }, 600);
-
-        setTimeout(function() {
-          msg.style.display = "none";
-      }, 1600);
+  showFixedNotification(message, "red");
 }
 
 function showCorrectMessage(message) {
-  const msg = document.getElementById("warning_msg");
   console.log("CORRECT");
-        msg.style.display = "block";
-        msg.style.opacity = 1;
-        msg.style.transition = "none";
-        msg.innerHTML = message
-        msg.style.color = "green";
-        msg.style.textAlign = "center";
+  showFixedNotification(message, "green");
+}
 
+function showFixedNotification(message, incolor) {
+  const notificationElement = document.getElementById('fixedNotification');
+  notificationElement.textContent = message;
+  notificationElement.style.display = 'block';
+  notificationElement.style.backgroundColor = incolor;
 
-        setTimeout(function() {
-            msg.style.opacity = 0;
-            msg.style.transition = "opacity 1s ease-in-out";
-        }, 600);
+  notificationElement.style.opacity = 1;
+  notificationElement.style.transition = "opacity 1s ease-in-out";
 
-        setTimeout(function() {
-          msg.style.display = "none";
-      }, 1600);
+  // Hide the fixed notification after the specified duration
+  setTimeout(function() {
+    notificationElement.style.opacity = 0;
+  }, 3000);
+
+  setTimeout(() => {
+    notificationElement.style.display = 'none';
+  }, 4000);
+  
 }
 
 function toggleForm(type){
@@ -465,6 +453,58 @@ async function showEntity(type, id, button) {
   }
 }
 
+async function bussinessOperationCheck(employeeId, orderId){
+
+  let dataEmployee;
+  let dataOrder;
+
+  try {
+    const response = await fetch("http://localhost:9000/employee/" + employeeId ,{
+        method: 'GET'
+    });
+
+    if (response.ok) {
+      dataEmployee = await response.json();
+        
+    } else {
+        console.error('Error loading employee:', response.status);
+        return false;
+    }
+  } catch (error) {
+    return false;
+  }
+
+  try {
+    const response = await fetch("http://localhost:9000/order/" + orderId ,{
+        method: 'GET'
+    });
+
+    if (response.ok) {
+      dataOrder = await response.json();
+        
+    } else {
+        console.error('Error order order:', response.status);
+        return false;
+    }
+  } catch (error) {
+    return false;
+  }
+
+  let totalOrderCost = 0;
+
+    for (let i = 0; i < dataEmployee.orders.length; i++) {
+      totalOrderCost += dataEmployee.orders[i].cost;
+    }
+
+  console.log(totalOrderCost + dataOrder.cost);  
+  if(totalOrderCost + dataOrder.cost > 100000){
+    console.log("Employee cant manage more than 100 000 worth of orders");
+    return false;
+  }
+
+  return true;
+}
+
 async function updateOrdersBelowDiv(employeeId){
 
   let data;
@@ -545,6 +585,11 @@ async function updateOrdersBelowDiv(employeeId){
   submitButton.style.marginLeft = "20px";
   submitButton.onclick = async function() {
     const orderId = inputOrderID.value;
+    if(await bussinessOperationCheck(employeeId, orderId) === false){
+      showWarningMessage("Employee or Order with this ID doesnt exist or the total cost is higher than 100 000");
+      updateOrdersBelowDiv(employeeId);
+      return;
+    }
     try {
       const response = await fetch("http://localhost:9000/employee/order/" + employeeId + "/" + orderId ,{
           method: 'POST'
@@ -682,6 +727,11 @@ async function updateEmployeesBelowDiv(orderId){
   submitButton.style.marginLeft = "20px";
   submitButton.onclick = async function() {
     const employeeId = inputEmployeeID.value;
+    if(await bussinessOperationCheck(employeeId, orderId) === false){
+      showWarningMessage("Employee or Order with this ID doesnt exist or the total cost is higher than 100 000");
+      updateEmployeesBelowDiv(orderId);
+      return;
+    }
     try {
       const response = await fetch("http://localhost:9000/employee/order/" + employeeId + "/" + orderId ,{
           method: 'POST'
@@ -1130,8 +1180,8 @@ async function addVehicle(){
 }
 
 function openTab(tabName) {
-    // Hide all tab contents
-    const tabs = document.getElementsByClassName("tab-content");
+  // Hide all tab contents
+  const tabs = document.getElementsByClassName("tab-content");
     for (const tab of tabs) {
       tab.style.display = "none";
     }
@@ -1145,49 +1195,51 @@ function openTab(tabName) {
     // Show the selected tab content and mark the tab button as active
     var active_button = document.getElementById("tab-button-" + tabName);
     active_button.classList.add("active");
-
+    
     var active_table = document.getElementById(tabName);
     active_table.style.display = "block";
 
     populateTable(tabName);
-}
-
-function populateTable(tabName) {
+  }
+  
+  function populateTable(tabName) {
     if(tabName == "employee"){
       var header = document.getElementById("table_header");
       header.innerHTML = "Employees";
       printAllEmployees();
     }
-
+    
     if(tabName == "vehicle"){
       var header = document.getElementById("table_header");
       header.innerHTML = "Vehicles";
       printAllVehicles();
     }
-
+    
     if(tabName == "order"){
       var header = document.getElementById("table_header");
       header.innerHTML = "Orders";
       printAllOrders();
     }
-
-}
-
-function start_page(){
-  var header = document.getElementById("table_header");
+    
+  }
+  
+  function start_page(){
+    var header = document.getElementById("table_header");
   header.innerHTML = "Choose Table";
-
+  
   // Hide all tab contents
   const tabs = document.getElementsByClassName("tab-content");
   for (const tab of tabs) {
     tab.style.display = "none";
   }
-
+  
   // Remove 'active' class from all tab buttons
   const tabButtons = document.getElementsByClassName("tab-button");
   for (const button of tabButtons) {
     button.classList.remove("active");
   }
 }
+
+showFixedNotification('This is a sample fixed notification', "red");
 
 start_page();
