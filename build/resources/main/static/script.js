@@ -211,6 +211,7 @@ async function printAllVehicles() {
       const data = await response.json();
 
       updateVehicleTable(data);
+      createDestructionButton();
   } catch (error) {
       console.error('Error fetching data:', error);
   }
@@ -262,6 +263,42 @@ function updateVehicleTable(vehicles) {
       ordersDiv.style.display = "none"; // Initially hide the div
       tableBody.appendChild(ordersDiv);
   });
+}
+
+function createDestructionButton(){
+  if(document.getElementById("destructionButton")){
+    return;
+  }
+  
+  const destructionButton = document.createElement('button');
+  destructionButton.id = 'destructionButton';
+  destructionButton.textContent = 'Scrap All Unused Vehicles';
+
+  destructionButton.addEventListener('click', async function() {
+    var confirmed = window.confirm('Are you sure you want to do this?');
+
+    if (confirmed) {
+      try {
+        const response = await fetch('http://localhost:9000/vehicle', {
+            method: 'DELETE'
+        });
+  
+        if (response.ok) {
+            printAllVehicles();
+        } else {
+            console.error("There was some unexpected error", response.status);
+        }
+    } catch (error) {
+        console.error("There was some unexpected error", error);
+    }
+    } else {
+        return;
+    }
+  });
+
+  // Append the button to the body
+  const vehicleDiv = document.getElementById("vehicle");
+  vehicleDiv.appendChild(destructionButton);
 }
 
 function createActionButton(entityType ,id , actionType) {
@@ -1239,7 +1276,5 @@ function openTab(tabName) {
     button.classList.remove("active");
   }
 }
-
-showFixedNotification('This is a sample fixed notification', "red");
 
 start_page();
