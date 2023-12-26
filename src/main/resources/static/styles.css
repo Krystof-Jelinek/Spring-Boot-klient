@@ -120,6 +120,25 @@ tr:hover {
     background-color: darkred; /* Darken the background on hover */
 }
 
+.restart-button {
+    background-color: red; /* Green background color */
+    color: white; /* White text color */
+    padding: 10px 20px; /* Padding for better appearance */
+    font-size: 16px; /* Font size */
+    border: none; /* No border */
+    border-radius: 5px; /* Add some border-radius for rounded corners */
+    cursor: pointer; /* Cursor style */
+    text-align: center;
+    position: relative;
+    margin: auto;
+    transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+/* Change background color on hover for a fancier effect */
+.restart-button:hover {
+    background-color: darkred; /* Darker green on hover */
+}
+
 /*-----------------------------FORM---------------------------------*/
 
 form {

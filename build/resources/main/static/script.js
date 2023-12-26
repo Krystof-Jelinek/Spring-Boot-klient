@@ -1277,4 +1277,30 @@ function openTab(tabName) {
   }
 }
 
+function restartData(){
+  var confirmed = window.confirm('This action will delete all data insert default sandbox data');
+
+    if (confirmed) {
+      fetch('http://localhost:9000/database', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      })
+      .then(response => {
+          if (response.ok) {
+              console.log('Data successfully restarted.');
+              start_page();
+          } else {
+              console.error('Failed to restart data.');
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+      });
+    } else {
+        return;
+    }
+}
+
 start_page();
