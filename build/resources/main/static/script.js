@@ -1115,28 +1115,32 @@ async function addEmployee(){
     birthDate: birthDate
   };
 
-  fetch('http://localhost:9000/employee', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(employeeData)
-  })
-  .then(response => {
-    console.log(response);
+  try {
+    const response = await fetch('http://localhost:9000/employee', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(employeeData),
+    });
 
+    const resp = await response;
+    
+    if (!response.ok) {
+      showWarningMessage("The date is not valid");
+      throw new Error('Network response was not ok');
+    }
+
+    console.log('Data updated successfully:', resp);
+    openTab("employee");
     showCorrectMessage("New Employee added");
-
-    // Clear the input fields
     document.getElementById("firstName").value = "";
     document.getElementById("lastName").value = "";
     document.getElementById("birthDate").value = "";
 
-    openTab("employee");
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+  }
 }
 
 async function addOrder(){
@@ -1153,28 +1157,29 @@ async function addOrder(){
     dateOfPayment: dateOfPayment,
   };
 
-  fetch('http://localhost:9000/order', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(orderData)
-  })
-  .then(response => {
-    console.log(response);
-
-    showCorrectMessage("New Order added");
-
-    // Clear the input fields
-    document.getElementById("cost").value = "";
-    document.getElementById("dateOfPayment").value = "";
-
-    openTab("order");
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-}
+  try{
+    const response = await fetch('http://localhost:9000/order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData)
+    })
+    if(!response.ok){
+      showWarningMessage("the Date or Cost was not correct");
+      throw new Error('Network response was not ok');
+    }
+      console.log(response);
+      showCorrectMessage("New Order added");
+      // Clear the input fields
+      document.getElementById("cost").value = "";
+      document.getElementById("dateOfPayment").value = "";
+      openTab("order");
+    }
+    catch(error){
+      console.error('Error:', error);
+    };
+  }
 
 async function addVehicle(){
   var spz = document.getElementById("spz").value;
@@ -1192,29 +1197,31 @@ async function addVehicle(){
     equipmentLevel: equipmentLevel
   };
 
-  fetch('http://localhost:9000/vehicle', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(vehicleData)
-  })
-  .then(response => {
-    console.log(response);
-
-    showCorrectMessage("New Vehicle added");
-
-    // Clear the input fields
-    document.getElementById("spz").value = "";
-    document.getElementById("color").value = "";
-    document.getElementById("equipmentLevel").value = "";
-
-    openTab("vehicle");
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-}
+  try{
+    const response = await fetch('http://localhost:9000/vehicle', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(vehicleData)
+    })
+    if(!response.ok){
+      showWarningMessage("Some of your input is incorrect");
+      throw new Error('Network response was not ok');
+    }
+      console.log(response);
+      showCorrectMessage("New Vehicle added");
+      // Clear the input fields
+      document.getElementById("spz").value = "";
+      document.getElementById("color").value = "";
+      document.getElementById("equipmentLevel").value = "";
+  
+      openTab("vehicle");
+    }
+    catch(error){
+      console.error('Error:', error);
+    }
+  }
 
 function openTab(tabName) {
   // Hide all tab contents
