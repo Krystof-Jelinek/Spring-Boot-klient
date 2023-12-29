@@ -1016,7 +1016,7 @@ async function saveOrderRow(rowData, id) {
     const resp = await response;
     
     if (!resp.ok) {
-      showWarningMessage("The date is not valid");
+      showWarningMessage("The Date or Cost is not valid");
       throw new Error('Network response was not ok');
     }
 
@@ -1084,7 +1084,7 @@ async function saveVehicleRow(rowData, id){
     const resp = await response;
     
     if (!response.ok) {
-      showWarningMessage("EquipmentLevel can only be an number");
+      showWarningMessage("EquipmentLevel can only be an number or its too long");
       throw new Error('Network response was not ok');
     }
 
